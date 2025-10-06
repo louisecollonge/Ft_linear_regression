@@ -3,56 +3,86 @@ import matplotlib.pyplot as plt
 import numpy
 
 
-#!~~~~~~~~~~~~~~~~~~~~~~~~~~~~ RECUPERER LES DONNEES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~!#
-
 df = pandas.read_csv('data.csv', sep=',') # interprete les nombre comme des float ou des int
-x = df['km'].values								# abscisses x = km. En faisant une operation sur x, on la fera d'un coup sur toutes les valeurs de x
+x = df['km'].values								# abscisses x = km (mileage)
 y = df['price'].values							# ordonnees y = prix
+														# Un operation sur x est appliquee a toutes les valeurs de x
 
 
-#!~~~~~~~~~~~~~~~~~~~~~~~ MON ALGO DE DESCENTE DU GRADIENT ~~~~~~~~~~~~~~~~~~~~~~~!#
+# normaliser x et y = les convertir pour etre a la meme echelle (ameliore l'algorithme)
+x_moy, y_moy					= numpy.mean(x), numpy.mean(y)
+x_ecart_type, y_ecart_type	= numpy.std(x), numpy.std(y)
+x_normalized					= (x - x_moy) / x_ecart_type
+y_normalized					= (y - y_moy) / y_ecart_type
 
-# normaliser x: lui donner la bonne echelle (l'ecart-type mesure l'etalement des donnees), sinon l'algo serait trop long
-x_moy				= numpy.mean(x)
-x_ecart_type	= numpy.std(x)
-x_normalized	= (x - x_moy) / x_ecart_type
 
-# prendre une droite (y = a x + b) au hasard, par ex. a et b egal a 0
+# prendre une droite (y = ax + b) au hasard, par ex. a et b egal a 0
 a, b = 0, 0
 
 # choisir un learningRate
 learningRate = 0.01
 
+
 # descente du gradient -> regression lineaire
 for _ in range (1000):
-	y_predicted = a * x_normalized + b
+	y_predicted_normalized = a * x_normalized + b
 
-	# calculer le score de cette droite avec la formule MSE d'erreur quadratique moyenne (= fonction de cout): score eleve = bcp d'erreur
-	a_corr = learningRate * (1 / len(x)) * numpy.sum((y_predicted - y) * x_normalized)
-	b_corr = learningRate * (1 / len(x)) * numpy.sum((y_predicted - y))
+	# calculer l'erreur quadratique moyenne (= fonction de cout): score eleve = bcp d'erreur
+	a_corr = learningRate * (1 / len(x)) * numpy.sum((y_predicted_normalized - y_normalized) * x_normalized)
+	b_corr = learningRate * (1 / len(x)) * numpy.sum((y_predicted_normalized - y_normalized))
 
 	# corriger a et b selon la descente de gradient, cad dans la direction qui reduit l'erreur
 	a = a - a_corr
 	b = b - b_corr
 
-x_reg = numpy.linspace(min(x), max(x), 100) # genere des points entre le min et le max de x pour un trace continu sur le graphique
-x_reg_normalized = (x_reg - x_moy) / x_ecart_type
-y_reg = (a * x_reg_normalized + b) # calcul de y pour tous les points de la droite, donc x_reg
+
+# enregistrer parametres pour entrainement du 1er programme
+with open('parameters.txt', 'w') as outFile:
+	outFile.write(f"{a} {b} {x_moy} {x_ecart_type} {y_moy} {y_ecart_type}\n")
 
 
-#!~~~~~~~~~~~~~~~~~~~~~~~~~~~~ AFFICHAGE DU GRAPHIQUE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~!#
+x_line = numpy.linspace(min(x), max(x), 100)			# genere des points entre min et max de x pour un trace continu
+x_line_normalized = (x_line - x_moy) / x_ecart_type	# normaliser x_line pour pouvoir calculer y_line_normalized
 
-plt.figure(figsize=(10, 6))												# taille de la fenetre
-plt.scatter(x, y, color='blue', label='Price per km')				# afficher les points en bleu
-plt.plot(x_reg, y_reg, color='red', label='Linear regression')	# afficher la droite de fonction affine
-plt.title("Linear regression with gradient descent algorithm")	# afficher un titre en haut au milieu
-plt.xlabel("km")																# afficher unite des abscisses
-plt.ylabel("Price")															# afficher unites des ordonnees
-plt.grid(True)																	# afficher un cadrillage
-plt.legend()																	# afficher une legende en haut a droite
-plt.show()																		# afficher le graphique
+y_line_normalized = a * x_line_normalized + b			# calcul de y pour tous les points de la droite
+y_line = y_line_normalized * y_ecart_type + y_moy		# denormaliser y pour l'affichage
 
 
+
+plt.figure(figsize=(10, 6))													# taille de la fenetre
+plt.scatter(x, y, color='blue', label='Price per km')					# afficher les points en bleu
+plt.plot(x_line, y_line, color='red', label='Linear regression')	# afficher la droite de fonction affine
+plt.title("Linear regression with gradient descent algorithm")		# afficher un titre en haut au milieu
+plt.xlabel("km")																	# afficher unite des abscisses
+plt.ylabel("Price")																# afficher unites des ordonnees
+plt.grid(True)																		# afficher un cadrillage
+plt.legend()																		# afficher une legende en haut a droite
+plt.show()																			# afficher le graphique
+
+
+
+
+
+# * Normalisation de x et y *
+# 
+# Lorsque x et y ont des valeurs d'ordres de grandeur tres differents,
+# l'algorithme devient lent et instable.
+# Il faut transformer x et y pour les mettre sur des echelles similaires,
+# centrees autour de 0.
+# 
+# 				x_normalized = (x - moyenne(x)) / ecart-type(x)
+# 
+# L'ecart-type reflete l'etalement des valeurs de x.
+# Ainsi, x et y sont sur la meme echelle [-1.22, 0, 1.22], ce qui rend les calculs
+# de la descente de gradient plus efficaces.
+# 
+# L'algorithme trouvera une droite representant la fonction affine y = ax + b
+# avec a et b calcules a partir de x_normalized et de y_normalized.
+# Cette fonction n'est pas valide sur x et y (non-normalises).
+# 
+# 
+# 
+# 
 # * Erreur quadratique moyenne ou MSE *
 # 
 # C'est la formule mathematique d'une fonction dite de cout.
@@ -71,4 +101,23 @@ plt.show()																		# afficher le graphique
 # 
 # Donc le resultat de la fonction de cout, a_corr ou b_corr, doit etre soustrait
 # a a ou b respectivement, pour inverser le signe.
+# 
+# 
+# 
+# 
+# * Affichage d'une droite *
+# 
+# x_line est un ensemble de point generes entre le min et le max de x et qui formeront
+# une droite continue sur le graphique. x_line n'est pas normalise puisqu'on utilise x.
+# 
+# On normalise x_line en r_line_normalized, car on ne peut recuperer y qu'en passant par
+# la fonction affine que l'algo nous a trouve, et qui utilise x et y normalises.
+# 
+# Une fois qu'on a calcule l'ensemble des y_line_normalized, on doit les de-normaliser
+# pour les afficher. Pour cela, il suffit d'inverser la formule de normalisation.
+# 
+# 				y_line = y_line_normalized * y_ecart_type + y_moy
+# 
+# 
+# 
 # 
