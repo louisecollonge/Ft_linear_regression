@@ -7,8 +7,8 @@ while True:
 		print("Please enter a valid integer.")
 		pass
 
-a0 = 0
-a1 = 0
-price = a0 + a1 * mileage
+a = 0
+b = 0
+price = a + b * mileage
 
 print("The price of your car is:", price)
