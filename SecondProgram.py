@@ -51,7 +51,7 @@ with open('parameters.txt', 'w') as outFile:
 # calculs de precision pour Precision.py
 errors		= y - y_predicted
 mae			= numpy.mean(numpy.abs(errors))
-mse			= numpy.mean(errors ** 2)
+mse			= numpy.mean(errors ** 2) # carre des erreurs
 rmse			= numpy.sqrt(mse)
 r_squared	= 1 - (numpy.sum(errors ** 2) / numpy.sum((y - numpy.mean(y)) ** 2))
 
@@ -77,6 +77,14 @@ plt.grid(True)																		# afficher un cadrillage
 plt.legend()																		# afficher une legende en haut a droite
 plt.show()																			# afficher le graphique
 
+
+
+# histogramme des residus = distribution des erreurs entre y reel et y predit
+plt.hist(errors, bins=20, color='blue', edgecolor='black')
+plt.xlabel("Résidus")
+plt.ylabel("Fréquence")
+plt.title("Distribution des résidus")
+plt.show()
 
 
 
@@ -140,5 +148,19 @@ plt.show()																			# afficher le graphique
 # 				y_line = y_line_normalized * y_ecart_type + y_moy
 # 
 # 
+# 
+# 
+# * Histogramme des residus *
+# 
+# Distribution des erreurs entre y reel et y predit par l'algo. 
+# Distribution gaussienne = normale = erreurs aleatoires symetriquement reparties autour de 0
+# Dans notre algo, les erreurs sont un peu biaisee positivement: la courbe gaussienne est > 0:
+# le prix suggere est souvent trop bas.
+# 
+# Ca peut s' expliquer par:
+# - la repartition ne suis pas tout a fait une regression lineaire 
+#   (d'autres facteurs entrent en jeu: la marque de la voiture, son etat...)
+# - certaines donnees de data.csv sont desequilibrees
+# - les donnees de data.csv sont trop peu nombreuses
 # 
 # 

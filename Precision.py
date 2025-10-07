@@ -6,7 +6,9 @@ def getParameters():
 	try:
 		with open('parameters.txt', 'r') as inFile:
 			inFile.readline()
-			return inFile.readline().split()
+			line2 = inFile.readline()
+			if line2:
+				return line2.strip().split() # strip retire le \n final, split separe aux espaces
 	except FileNotFoundError:
 		return None
 
@@ -15,11 +17,17 @@ def calculatePrecision():
 	if parameters is None:
 		print("Run SecondProgram first.")
 		return
-	
-	mae			= float(parameters[0])
-	mse			= float(parameters[1])
-	rmse			= float(parameters[2])
-	r_squared	= float(parameters[3])
+	if len(parameters) != 4:
+		print("Error: invalid number of parameters in parameters.txt")
+		return
+	try:
+		mae			= float(parameters[0])
+		mse			= float(parameters[1])
+		rmse			= float(parameters[2])
+		r_squared	= float(parameters[3])
+	except ValueError:
+		print("Error: invalid parameter format in parameters.txt")
+		return
 
 	print("\033[1m" + "\nPRECISION OF THE ALGORITHM:" + "\033[0m")
 	print(">> Mean Absolute Error =\t\t" + "\033[1m" + f"{round(mae)}" + "\033[0m" + "\t(erreur de prix moyenne)")
