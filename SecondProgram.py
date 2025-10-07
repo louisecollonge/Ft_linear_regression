@@ -1,11 +1,16 @@
+# 
+# Ce programme implemente une regression lineaire a partir de l'algorithme de descente de gradient
+# depuis un nuage de points. Il en ressort une fonction affine y = ax + b
+# 
+
 import pandas
 import matplotlib.pyplot as plt
 import numpy
 
 
 df = pandas.read_csv('data.csv', sep=',') # interprete les nombre comme des float ou des int
-x = df['km'].values								# abscisses x = km (mileage)
-y = df['price'].values							# ordonnees y = prix
+x = df['km'].values.astype(float)			# abscisses x = km (mileage)
+y = df['price'].values.astype(float)		# ordonnees y = prix
 														# Un operation sur x est appliquee a toutes les valeurs de x
 
 
@@ -16,39 +21,52 @@ x_normalized					= (x - x_moy) / x_ecart_type
 y_normalized					= (y - y_moy) / y_ecart_type
 
 
-# prendre une droite (y = ax + b) au hasard, par ex. a et b egal a 0
+# y = ax + b ; choisir a, b au hasard et learningRate
 a, b = 0, 0
-
-# choisir un learningRate
 learningRate = 0.01
 
 
 # descente du gradient -> regression lineaire
 for _ in range (1000):
 	y_predicted_normalized = a * x_normalized + b
-
-	# calculer l'erreur quadratique moyenne (= fonction de cout): score eleve = bcp d'erreur
+	# calculer l'erreur quadratique moyenne (= fonction de cout): eleve = bcp d'erreur
 	a_corr = learningRate * (1 / len(x)) * numpy.sum((y_predicted_normalized - y_normalized) * x_normalized)
 	b_corr = learningRate * (1 / len(x)) * numpy.sum((y_predicted_normalized - y_normalized))
-
 	# corriger a et b selon la descente de gradient, cad dans la direction qui reduit l'erreur
 	a = a - a_corr
 	b = b - b_corr
 
 
-# enregistrer parametres pour entrainement du 1er programme
+# recalculer apres descente de gradient avec a et b finaux
+y_predicted_normalized = a * x_normalized + b
+y_predicted = y_predicted_normalized * y_ecart_type + y_moy
+
+
+# enregistrer parametres pour entrainement FirstProgram.py
 with open('parameters.txt', 'w') as outFile:
 	outFile.write(f"{a} {b} {x_moy} {x_ecart_type} {y_moy} {y_ecart_type}\n")
 
 
-x_line = numpy.linspace(min(x), max(x), 100)			# genere des points entre min et max de x pour un trace continu
-x_line_normalized = (x_line - x_moy) / x_ecart_type	# normaliser x_line pour pouvoir calculer y_line_normalized
 
-y_line_normalized = a * x_line_normalized + b			# calcul de y pour tous les points de la droite
-y_line = y_line_normalized * y_ecart_type + y_moy		# denormaliser y pour l'affichage
+# calculs de precision pour Precision.py
+errors		= y - y_predicted
+mae			= numpy.mean(numpy.abs(errors))
+mse			= numpy.mean(errors ** 2)
+rmse			= numpy.sqrt(mse)
+r_squared	= 1 - (numpy.sum(errors ** 2) / numpy.sum((y - numpy.mean(y)) ** 2))
+
+with open('parameters.txt', 'a') as outFile:
+	outFile.write(f"{mae} {mse} {rmse} {r_squared}\n")
 
 
 
+# generer une ligne continue
+x_line = numpy.linspace(min(x), max(x), 100)								# genere des points entre min et max de x pour un trace continu
+x_line_normalized = (x_line - x_moy) / x_ecart_type					# normaliser x_line pour pouvoir calculer y_line_normalized
+y_line_normalized = a * x_line_normalized + b							# calcul de y pour tous les points de la droite
+y_line = y_line_normalized * y_ecart_type + y_moy						# denormaliser y pour l'affichage
+
+# affichage du graphique
 plt.figure(figsize=(10, 6))													# taille de la fenetre
 plt.scatter(x, y, color='blue', label='Price per km')					# afficher les points en bleu
 plt.plot(x_line, y_line, color='red', label='Linear regression')	# afficher la droite de fonction affine
@@ -63,6 +81,9 @@ plt.show()																			# afficher le graphique
 
 
 
+
+# 
+# 
 # * Normalisation de x et y *
 # 
 # Lorsque x et y ont des valeurs d'ordres de grandeur tres differents,
