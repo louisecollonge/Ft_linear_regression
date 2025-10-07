@@ -1,7 +1,7 @@
 # 
 # Ce programme estime le prix d'une voiture selon son kilometrage.
-# Avant son entrainement par le SecondProgram, il donnera toujours 0.
-# Apres, il utilisera la fonction trouvee par l'algorithme du SecondProgram,
+# Avant son entrainement par le linearRegression, il donnera toujours 0.
+# Apres, il utilisera la fonction trouvee par l'algorithme du linearRegression,
 # grace a la recuperation des parametres de cette fonction dans le
 # fichier parameters.txt
 # 
@@ -39,7 +39,7 @@ def estimatePrice():
 	parameters	= getParameters()
 
 	if parameters is None:
-		print("The price of your car is 0. The model has not been trained yet. Please run SecondProgram first.")
+		print("The price of your car is 0. The model has not been trained yet. Please run linearRegression first.")
 		return
 	if len(parameters) != 6:
 		print("Error: invalid number of parameters in parameters.txt")

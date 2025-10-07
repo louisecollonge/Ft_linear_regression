@@ -8,10 +8,14 @@ import matplotlib.pyplot as plt
 import numpy
 
 
-df = pandas.read_csv('data.csv', sep=',') # interprete les nombre comme des float ou des int
-x = df['km'].values.astype(float)			# abscisses x = km (mileage)
-y = df['price'].values.astype(float)		# ordonnees y = prix
-														# Un operation sur x est appliquee a toutes les valeurs de x
+try:
+	df = pandas.read_csv('data.csv', sep=',') # interprete les nombre comme des float ou des int
+	x = df['km'].values.astype(float)			# abscisses x = km (mileage)
+	y = df['price'].values.astype(float)		# ordonnees y = prix
+															# Un operation sur x est appliquee a toutes les valeurs de x
+except FileNotFoundError:
+	print("Missing data.csv file")
+	exit()
 
 
 # normaliser x et y = les convertir pour etre a la meme echelle (ameliore l'algorithme)
@@ -42,7 +46,7 @@ y_predicted_normalized = a * x_normalized + b
 y_predicted = y_predicted_normalized * y_ecart_type + y_moy
 
 
-# enregistrer parametres pour entrainement FirstProgram.py
+# enregistrer parametres pour entrainement estimateCarPrice.py
 with open('parameters.txt', 'w') as outFile:
 	outFile.write(f"{a} {b} {x_moy} {x_ecart_type} {y_moy} {y_ecart_type}\n")
 

@@ -15,7 +15,7 @@ def getParameters():
 def calculatePrecision():
 	parameters = getParameters()
 	if parameters is None:
-		print("Run SecondProgram first.")
+		print("Run linearRegression first.")
 		return
 	if len(parameters) != 4:
 		print("Error: invalid number of parameters in parameters.txt")
